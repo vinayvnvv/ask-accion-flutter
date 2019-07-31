@@ -6,7 +6,8 @@ import './model/msg.dart';
 
 class MsgContainer extends StatelessWidget {
   IMsg item;
-  var sendQuery; 
+  var sendQuery;
+
   MsgContainer(IMsg item, sendQuery) {
     this.item = item;
     this.sendQuery = sendQuery;
@@ -18,7 +19,7 @@ class MsgContainer extends StatelessWidget {
       msgs.add(new TextMsg(item));
     }
     switch (item.type) {
-      case 'text': 
+      case 'text':
         msgs.add(new TextMsg(item));
         break;
       case 'menu':
@@ -32,16 +33,14 @@ class MsgContainer extends StatelessWidget {
     }
     return msgs;
   }
-  
+
   @override
-  Widget build (BuildContext context) {
-    return(
-      Container(
-        margin: EdgeInsets.fromLTRB(9.0, 13.0, 9.0, 5.0),
-        child: Column(
-          children: selectMsgType(),
-        ),
-      )
-    );
+  Widget build(BuildContext context) {
+    return (Container(
+      margin: EdgeInsets.fromLTRB(9.0, 13.0, 9.0, 5.0),
+      child: Column(
+        children: selectMsgType(),
+      ),
+    ));
   }
 }
