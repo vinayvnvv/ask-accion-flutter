@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:uiplay/model/user.dart';
+import 'package:uiplay/screens/profile/profile.dart';
+import 'package:uiplay/services/parser.dart';
 import 'msg-container.dart';
 import './model/msg.dart';
 import 'dart:convert';
@@ -19,6 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.red,
@@ -45,8 +48,10 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> suggestions = [];
   String fieldValue = '';
   IUser user;
+  bool loading = true;
   ScrollController _scrollController = new ScrollController();
   TextEditingController _textEditingController = new TextEditingController();
+  Parser msgParser = new Parser();
 
   GoogleSignIn _googleSignIn = new GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -65,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
             displayName: onValue.displayName, 
             photoUrl: onValue.photoUrl,
             email: onValue.email,
+            firstName: onValue.displayName.substring(0, onValue.displayName.indexOf(" "))
           );
       });
     }).catchError((onError) {
@@ -106,17 +112,25 @@ class _MyHomePageState extends State<MyHomePage> {
       "msg": query,
       "uuid": "ssssss"
     };
+    setState(() {
+      loading = true;
+    });
     http.post('http://intranet.accionlabs.com:3004/api/query', 
               headers: {"Content-Type": "application/json"},
               body: json.encode(data)).then((onValue) {
         print("Response send query");
         print(onValue.body);
-        IMsg msg = IMsg.fromJson(json.decode(onValue.body));
+        String _msg = onValue.body;
+        _msg = this.msgParser.parseMsgVars(_msg, user);
+        IMsg msg = IMsg.fromJson(json.decode(_msg));
         this.pushMsgs(msg);
         // this.msgs.add(msg);
         // setState(() {
         //   msgs = msgs;
         // });
+        setState(() {
+          loading = false;
+        });
         this.scrollToBottom();
       });
   }
@@ -194,8 +208,18 @@ class _MyHomePageState extends State<MyHomePage> {
         // setState(() {
         //   msgs = msgs;
         // });
+        setState(() {
+          loading = false;
+        });
         this.pushMsgs(msg);
       });
+  }
+
+  navigateToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Profile(user: this.user)),
+    );
   }
 
   putSuggestions() {
@@ -237,7 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if(suggestions != null && suggestions.length > 0) return new Container(
       height: 45,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white
       ),
       child: listView,
     );
@@ -266,18 +290,27 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[
           new Row(
             children: <Widget>[
-              new Container(
-                margin: EdgeInsets.fromLTRB(0, 0, 11, 0),
-                height: 30,
-                width: 30,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    image: DecorationImage(
-                      // fit: BoxFit.fitHeight,
-                      image: NetworkImage((user != null ? user.photoUrl : ""))
-                    ),
-                  )
-                ),
+              GestureDetector(
+                onTap: this.navigateToProfile,
+                child: 
+                  Hero(
+                    tag: 'profile-avtar',
+                    child:
+                      new Container(
+                        margin: EdgeInsets.fromLTRB(0, 0, 11, 0),
+                        height: 30,
+                        width: 30,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(50)),
+                            image: DecorationImage(
+                              // fit: BoxFit.fitHeight,
+                              image: NetworkImage((user != null ? user.photoUrl : ""))
+                            ),
+                          )
+                      ),
+                  ),
+              )
+              
             ],
           )
           
@@ -299,7 +332,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   controller: _scrollController,
                   itemCount: (msgs != null ? msgs.length : 0),
                   itemBuilder: (BuildContext context, int index) {
-                    return new MsgContainer(msgs[index], sendQuery);
+                    return new MsgContainer(
+                      msgs[index], 
+                      sendQuery, 
+                      (index == msgs.length-1 && loading)
+                    );
                   },
                 ),
               )
