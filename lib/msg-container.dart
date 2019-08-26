@@ -25,7 +25,7 @@ class MsgContainer extends StatelessWidget {
       msgs.add(new TextMsg(item));
     }
     switch (item.type) {
-      case 'text': 
+      case 'text':
         msgs.add(new TextMsg(item));
         break;
       case 'menu':

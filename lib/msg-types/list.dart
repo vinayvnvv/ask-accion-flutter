@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import './../model/msg.dart';
+
 class ListMsg extends StatelessWidget {
   IMsg msg;
   var sendQuery;
+
   ListMsg(IMsg msg, sendQuery) {
     this.msg = msg;
     this.sendQuery = sendQuery;
@@ -12,32 +14,31 @@ class ListMsg extends StatelessWidget {
 
   listItem(List<String> list, BuildContext context) {
     final lists = <Widget>[];
-    for(var i=0;i<list.length;i++) {
+    for (var i = 0; i < list.length; i++) {
       String listItem = list[i];
       lists.add(
         new Material(
           color: Colors.white,
           child: new InkWell(
-            onTap: () {
-              sendQuery(listItem);
-            },
-            child: new Container(
-              padding: EdgeInsets.all(19),
-              width: MediaQuery.of(context).size.width,
-
-              decoration: new BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    width: (list.length == (i+1) ? 0 : 0.7),
-                    color: (list.length != (i+1) ? Color(0xFFe3e3e3) : Colors.transparent)
-                  )
-                ),
-                // borderRadius: BorderRadius.all(Radius.circular(11.0))
-              ),
-              child: new Text(listItem))
-            )
-          )
-        );
+              onTap: () {
+                sendQuery(listItem);
+              },
+              child: new Container(
+                  padding: EdgeInsets.all(19),
+                  width: MediaQuery.of(context).size.width,
+                  decoration: new BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                          width: (list.length == (i + 1) ? 0 : 0.7),
+                          color: (list.length != (i + 1)
+                              ? Color(0xFFe3e3e3)
+                              : Colors.transparent)),
+                    ),
+                    // borderRadius: BorderRadius.all(Radius.circular(11.0))
+                  ),
+                  child: new Text(listItem))),
+        ),
+      );
       // if(menus.length != (i+1)) {
       //   lists.add(
       //     new Divider(
@@ -69,7 +70,7 @@ class ListMsg extends StatelessWidget {
           //     width: 1.0,
           //     color: Color(0xFFe3e3e3)
           //   ),
-            // borderRadius: BorderRadius.all(Radius.circular(11.0)),
+          // borderRadius: BorderRadius.all(Radius.circular(11.0)),
           //   // boxShadow: [
           //   //   BoxShadow(
           //   //     // color: Color(0xFFe9e9e9),
@@ -81,11 +82,9 @@ class ListMsg extends StatelessWidget {
           // ),
           child: new Column(
             children: listItem(msg.list, context),
-          )
-        )
+          ),
+        ),
       ),
     );
-    
-    
   }
 }

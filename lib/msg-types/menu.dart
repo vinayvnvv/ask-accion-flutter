@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:uiplay/constants/icons.dart';
 import 'package:uiplay/model/menu.dart';
 import './../model/msg.dart';
+
 class MenuMsg extends StatelessWidget {
   IMsg msg;
   var sendQuery;
+
   MenuMsg(IMsg msg, sendQuery) {
     this.msg = msg;
     this.sendQuery = sendQuery;
@@ -14,7 +16,7 @@ class MenuMsg extends StatelessWidget {
 
   listItem(List<IMenu> menus, BuildContext context) {
     final lists = <Widget>[];
-    for(var i=0;i<menus.length;i++) {
+    for (var i = 0; i < menus.length; i++) {
       IMenu menuItem = menus[i];
       lists.add(
         new Material(
@@ -26,14 +28,13 @@ class MenuMsg extends StatelessWidget {
             child: new Container(
               padding: EdgeInsets.all(13),
               width: MediaQuery.of(context).size.width,
-
               decoration: new BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                    width: (menus.length == (i+1) ? 0 : 0.4),
-                    color: (menus.length != (i+1) ? Color(0xFFe3e3e3) : Colors.transparent)
-                  )
-                ),
+                    bottom: BorderSide(
+                        width: (menus.length == (i + 1) ? 0 : 0.4),
+                        color: (menus.length != (i + 1)
+                            ? Color(0xFFe3e3e3)
+                            : Colors.transparent))),
                 // borderRadius: BorderRadius.all(Radius.circular(11.0))
               ),
               child: new Row(
@@ -42,42 +43,46 @@ class MenuMsg extends StatelessWidget {
                 children: <Widget>[
                   new Container(
                     width: 40,
-                    child: new Icon(ICONS[menuItem.icon], size: 29, color: Theme.of(context).primaryColor,),
+                    child: new Icon(
+                      ICONS[menuItem.icon],
+                      size: 29,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                   new Container(
                     padding: EdgeInsets.all(11),
-                    child: 
-                      new Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          new Container(
-                              child: new Text(menuItem.name, 
-                                style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                              ),
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        new Container(
+                          child: new Text(
+                            menuItem.name,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          new Container(
-                            margin: EdgeInsets.fromLTRB(0, 4, 0, 0),
-                            width: MediaQuery.of(context).size.width*0.67,
-                            child: new Text(
-                                menuItem.desc,
-                                style: TextStyle(
-                                  color: Colors.black45,
-                                  fontSize: 12,
-                                ),
-                              ),
-                          )
-                        ],
-                      ),
-                  )
+                        ),
+                        new Container(
+                          margin: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                          width: MediaQuery.of(context).size.width * 0.67,
+                          child: new Text(
+                            menuItem.desc,
+                            style: TextStyle(
+                              color: Colors.black45,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       );
       // if(menus.length != (i+1)) {
       //   lists.add(
@@ -110,7 +115,7 @@ class MenuMsg extends StatelessWidget {
           //     width: 1.0,
           //     color: Color(0xFFe3e3e3)
           //   ),
-            // borderRadius: BorderRadius.all(Radius.circular(11.0)),
+          // borderRadius: BorderRadius.all(Radius.circular(11.0)),
           //   // boxShadow: [
           //   //   BoxShadow(
           //   //     // color: Color(0xFFe9e9e9),
@@ -122,11 +127,9 @@ class MenuMsg extends StatelessWidget {
           // ),
           child: new Column(
             children: listItem(msg.menu, context),
-          )
-        )
+          ),
+        ),
       ),
     );
-    
-    
   }
 }

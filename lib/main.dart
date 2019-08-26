@@ -13,7 +13,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 void main() => runApp(MyApp());
 
-
 // List listData = [{'msg': 'Helo vinay, Good evening, how are you doing?', 'type': 'text', 'from': 'bot'}, {'msg': 'hello', 'type': 'text', 'from': 'user'}];
 
 class MyApp extends StatelessWidget {
@@ -44,7 +43,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   List list = [];
-  List <IMsg> msgs = [];
+  List<IMsg> msgs = [];
   List<String> suggestions = [];
   String fieldValue = '';
   IUser user;
@@ -57,8 +56,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<FirebaseUser> _signIn() async {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -76,7 +76,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }).catchError((onError) {
       print(onError);
     });
-
   }
 
   // void _incrementCounter() {
@@ -87,9 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    
 
     _signIn();
     this.connectToServer();
@@ -102,8 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
       list = list;
     });
   }
-
-
 
   onSendQuery(query) {
     Map data = {
@@ -132,7 +127,8 @@ class _MyHomePageState extends State<MyHomePage> {
           loading = false;
         });
         this.scrollToBottom();
-      });
+      },
+    );
   }
 
   onSendButton() {
@@ -140,14 +136,13 @@ class _MyHomePageState extends State<MyHomePage> {
     print(fieldValue);
     this.pushMsgs(IMsg(msg: fieldValue, type: 'text', from: 'user'));
     // this.msgs.add(IMsg(msg: fieldValue, type: 'text', from: 'user'));
-    // 
+    //
     // setState(() {
     //   fieldValue = '';
     //   msgs = msgs;
     // });
     this.onSendQuery(fieldValue);
     this.scrollToBottom();
-
 
     // googleSignIn.signIn().then((result) {
     //   result.authentication.then((googleAuth) {
@@ -166,17 +161,17 @@ class _MyHomePageState extends State<MyHomePage> {
     // }).catchError((e) {
     //   print(e);
     // });
-    
   }
 
   pushMsgs(IMsg msg) {
     this.msgs.add(msg);
-    setState(() {
-      msgs = msgs;
-      suggestions = msg.suggestions;
-    });
+    setState(
+      () {
+        msgs = msgs;
+        suggestions = msg.suggestions;
+      },
+    );
   }
-
 
   sendQuery(query) {
     this.pushMsgs(IMsg(msg: query, type: 'text', from: 'user'));
@@ -189,19 +184,21 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _textEditingController.clear();
-      this._scrollController.animateTo(
-        this._scrollController.position.maxScrollExtent,
-        curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 300)
-      );
-    });
+    Future.delayed(
+      const Duration(milliseconds: 300),
+      () {
+        _textEditingController.clear();
+        this._scrollController.animateTo(
+            this._scrollController.position.maxScrollExtent,
+            curve: Curves.easeOut,
+            duration: const Duration(milliseconds: 300));
+      },
+    );
   }
 
-
   connectToServer() {
-      http.get('https://ask-accion.herokuapp.com/api/connect').then((onValue) {
+    http.get('https://ask-accion.herokuapp.com/api/connect').then(
+      (onValue) {
         print(onValue.body);
         IMsg msg = IMsg.fromJson(json.decode(onValue.body));
         // this.msgs.add(msg);
@@ -212,7 +209,8 @@ class _MyHomePageState extends State<MyHomePage> {
           loading = false;
         });
         this.pushMsgs(msg);
-      });
+      },
+    );
   }
 
   navigateToProfile() {
@@ -236,26 +234,24 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: EdgeInsets.fromLTRB(15, 4, 15, 4),
             // height: 30,
             decoration: BoxDecoration(
-              border: Border.all(
-                width: 0.8,
-                color: Colors.black12
-              ),
-              borderRadius: BorderRadius.all(Radius.circular(19))
-            ),
+                border: Border.all(width: 0.8, color: Colors.black12),
+                borderRadius: BorderRadius.all(Radius.circular(19))),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Text(suggestions[index], style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 16,
-                  // fontWeight: FontWeight.w500
-                ),)
+                Text(
+                  suggestions[index],
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 16,
+                    // fontWeight: FontWeight.w500
+                  ),
+                ),
               ],
             ),
-          )
+          ),
         );
-        
       },
     );
     if(suggestions != null && suggestions.length > 0) return new Container(
@@ -272,19 +268,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.white
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.white));
     return Scaffold(
       appBar: AppBar(
         brightness: Brightness.light,
         title: new Row(
           children: <Widget>[
-            Image.asset('assets/logo.png', width: 30,),
+            Image.asset(
+              'assets/logo.png',
+              width: 30,
+            ),
             new Container(
               margin: EdgeInsets.fromLTRB(9, 0, 0, 0),
-              child: Text(widget.title, style: TextStyle(color: Colors.black),),
-            )
+              child: Text(
+                widget.title,
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
           ],
         ),
         actions: <Widget>[
@@ -312,8 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
               )
               
             ],
-          )
-          
+          ),
         ],
         backgroundColor: Colors.white,
         toolbarOpacity: 0.7,
@@ -345,11 +345,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border(
-                    top: BorderSide(
-                      width: 0.5,
-                      color: Colors.black26
-                    )
-                  ),
+                      top: BorderSide(width: 0.5, color: Colors.black26)),
                 ),
                 child: Column(
                   children: <Widget>[
@@ -377,44 +373,49 @@ class _MyHomePageState extends State<MyHomePage> {
                                   controller: _textEditingController,
                                   onChanged: (text) {
                                     fieldValue = text;
-                                    setState(() {
-                                      fieldValue = fieldValue;
-                                    });
+                                    setState(
+                                      () {
+                                        fieldValue = fieldValue;
+                                      },
+                                    );
                                   },
                                   style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.black
-                                  ),
+                                      fontSize: 18, color: Colors.black),
                                   decoration: InputDecoration(
                                     hintText: 'Ask something..',
-                                    hintStyle: TextStyle(
-                                      color: Color(0xFFBBBBBB)
-                                    ),
+                                    hintStyle:
+                                        TextStyle(color: Color(0xFFBBBBBB)),
                                     border: InputBorder.none,
                                     focusedBorder: InputBorder.none,
                                   ),
+                                ),
                               ),
-                            ),
-                            new Positioned(
-                              right: 0,
-                              child: IconButton(
-                                disabledColor: Colors.black12,
-                                icon: Icon(Icons.send, color: Theme.of(context).primaryColor,), 
-                                onPressed: fieldValue == '' || fieldValue == null ? null : onSendButton
+                              new Positioned(
+                                right: 0,
+                                child: IconButton(
+                                  disabledColor: Colors.black12,
+                                  icon: Icon(
+                                    Icons.send,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  onPressed:
+                                      fieldValue == '' || fieldValue == null
+                                          ? null
+                                          : onSendButton,
+                                ),
                               ),
-                            )
                             ],
-                          )
-                        )
+                          ),
+                        ),
                       ],
                     ),
                   ],
-                )
-              )
-            )
+                ),
+              ),
+            ),
           ],
         ),
-      )// This trailing comma makes auto-formatting nicer for build methods.
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
