@@ -6,13 +6,15 @@ import 'package:uiplay/widgets/jumping-dots.dart';
 import 'package:uiplay/widgets/msg-loader.dart';
 import './msg-types/text.dart';
 import './model/msg.dart';
+import 'package:uiplay/msg-types/leave_balance_list.dart';
 
 class MsgContainer extends StatelessWidget {
   IMsg item;
-  var sendQuery; 
+  var sendQuery;
   var index;
   var msgLength;
   bool loading;
+
   MsgContainer(IMsg item, sendQuery, loading) {
     this.item = item;
     this.sendQuery = sendQuery;
@@ -40,24 +42,26 @@ class MsgContainer extends StatelessWidget {
         print("Inside People List");
         msgs.add(new PeopleListMsg(item, sendQuery));
         break;
+
+      case 'listView':
+        print("Leave Balance");
+        msgs.add(LeaveBalanceListMsg(item, sendQuery));
+        break;
     }
     return msgs;
   }
 
   showLoader() {
-    return (loading ? new Container(
+    return (loading
+        ? new Container(
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 new Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
-                    border: Border.all(
-                      color: Color(0xFFd9d9d9),
-                      width: 0.7
-                    )
-                  ),
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      border: Border.all(color: Color(0xFFd9d9d9), width: 0.7)),
                   child: new Row(
                     // crossAxisAlignment: CrossAxisAlignment.center,
                     // mainAxisAlignment: MainAxisAlignment.center,
@@ -67,30 +71,27 @@ class MsgContainer extends StatelessWidget {
                         // child: new Text('. . .', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),),
                         child: MsgLoader(),
                       )
-                      
                     ],
                   ),
                 )
               ],
             ),
-        ) : new Container()
-      );
+          )
+        : new Container());
   }
-  
+
   @override
-  Widget build (BuildContext context) {
-    return(
-      Container(
-        margin: EdgeInsets.fromLTRB(9.0, 13.0, 9.0, 5.0),
-        child: Column(
-          children: <Widget>[
-            new Column(
-              children: selectMsgType(),
-            ),
-            this.showLoader(),
-          ],
-        ),
-      )
-    );
+  Widget build(BuildContext context) {
+    return (Container(
+      margin: EdgeInsets.fromLTRB(9.0, 13.0, 9.0, 5.0),
+      child: Column(
+        children: <Widget>[
+          new Column(
+            children: selectMsgType(),
+          ),
+          this.showLoader(),
+        ],
+      ),
+    ));
   }
 }
