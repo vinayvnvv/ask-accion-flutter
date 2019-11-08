@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:uiplay/msg-types/list-view.dart';
 import 'package:uiplay/msg-types/list.dart';
 import 'package:uiplay/msg-types/menu.dart';
 import 'package:uiplay/msg-types/people-list.dart';
-import 'package:uiplay/widgets/jumping-dots.dart';
 import 'package:uiplay/widgets/msg-loader.dart';
 import './msg-types/text.dart';
 import './model/msg.dart';
@@ -35,6 +35,10 @@ class MsgContainer extends StatelessWidget {
       case 'list':
         print("Inside List");
         msgs.add(new ListMsg(item, sendQuery));
+        break;
+      case 'listView':
+        print("Inside listView");
+        msgs.add(new ListViewMsg(item, sendQuery));
         break;
       case 'people-list':
         print("Inside People List");

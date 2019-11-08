@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:uiplay/model/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uiplay/screens/login/login.dart';
 import 'package:uiplay/screens/profile/profile.dart';
 import 'package:uiplay/services/parser.dart';
 import 'msg-container.dart';
@@ -10,6 +12,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import './env.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,7 +29,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.red,
         primaryColor: Color(0xFFb82e30),
       ),
-      home: MyHomePage(title: 'Assistance'),
+      // home: MyHomePage(title: 'Assistance'),
+      home: Login(),
     );
   }
 }
@@ -48,35 +52,11 @@ class _MyHomePageState extends State<MyHomePage> {
   String fieldValue = '';
   IUser user;
   bool loading = true;
+  SharedPreferences prefs;
   ScrollController _scrollController = new ScrollController();
   TextEditingController _textEditingController = new TextEditingController();
   Parser msgParser = new Parser();
-
-  GoogleSignIn _googleSignIn = new GoogleSignIn();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  Future<FirebaseUser> _signIn() async {
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    _auth.signInWithCredential(credential).then((onValue) {
-      print("onValue -> ${onValue}");
-      setState(() {
-        user = IUser(
-            displayName: onValue.displayName, 
-            photoUrl: onValue.photoUrl,
-            email: onValue.email,
-            firstName: onValue.displayName.substring(0, onValue.displayName.indexOf(" "))
-          );
-      });
-    }).catchError((onError) {
-      print(onError);
-    });
-  }
+  final String _baseUrl = environment['baseUrl'];
 
   // void _incrementCounter() {
   //   setState(() {
@@ -87,30 +67,48 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    this.initApp();
+  }
 
-    _signIn();
+  initApp() async {
+    prefs = await SharedPreferences.getInstance();
+    String loggedEmail = prefs.getString('user');
+    print("loggedEmail");
+    print(loggedEmail);
+    if(loggedEmail?.isEmpty ?? true) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
+    } else {
+      this.user = IUser.fromJson(json.decode(loggedEmail));
+    }
     this.connectToServer();
-    // for (var i = 0; i < 30; i++) {
-    //   this.list.add({'msg': 'hello', 'type': 'text', 'from': (i%2 == 0 ? 'user' : 'bot')});
-    //   this.msgs.add(IMsg(msg: 'Hello, Good Morning', type: 'text', from: (i%2 == 0 ? 'user' : 'bot')));
-    // }
-
     setState(() {
       list = list;
     });
   }
 
+
+  initBot() async {
+    
+  }
+
+
   onSendQuery(query) {
+    print(_baseUrl + 'query');
     Map data = {
       "emailId": "vinay.bv@accionlabs.com",
       "empId": "393858000000126653",
       "msg": query,
-      "uuid": "ssssss"
+      "uuid": "ssssss",
+
+      "headers": {
+        "employeeId": "1698",
+        "role": "Admin"
+      }
     };
     setState(() {
       loading = true;
     });
-    http.post('http://intranet.accionlabs.com:3004/api/query', 
+    http.post(_baseUrl + 'query', 
               headers: {"Content-Type": "application/json"},
               body: json.encode(data)).then((onValue) {
         print("Response send query");
@@ -197,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   connectToServer() {
-    http.get('https://ask-accion.herokuapp.com/api/connect').then(
+    http.get(_baseUrl + 'connect').then(
       (onValue) {
         print(onValue.body);
         IMsg msg = IMsg.fromJson(json.decode(onValue.body));
