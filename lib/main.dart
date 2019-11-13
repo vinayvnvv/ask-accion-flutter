@@ -1,17 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:speech_recognition/speech_recognition.dart';
+import 'package:uiplay/constants/colors.dart';
 import 'package:uiplay/model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uiplay/screens/login/login.dart';
 import 'package:uiplay/screens/profile/profile.dart';
+import 'package:uiplay/services/common.service.dart';
+import 'package:uiplay/services/http.service.dart';
 import 'package:uiplay/services/parser.dart';
 import 'msg-container.dart';
 import './model/msg.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import './env.dart';
 
 void main() => runApp(MyApp());
@@ -51,11 +56,23 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> suggestions = [];
   String fieldValue = '';
   IUser user;
+  HttpService httpService = new HttpService();
+  IZohoUser zohoUser;
   bool loading = true;
+  String userRoleType = '';
   SharedPreferences prefs;
   ScrollController _scrollController = new ScrollController();
   TextEditingController _textEditingController = new TextEditingController();
+  CommonService commonService = new CommonService();
   Parser msgParser = new Parser();
+  SpeechRecognition _speech;
+  bool _speechRecognitionAvailable;
+  String _currentSpeechLocale;
+  var _voiceModalSheetContext;
+  bool _isListening;
+  String transcription;
+  var _controller;
+
   final String _baseUrl = environment['baseUrl'];
 
   // void _incrementCounter() {
@@ -73,12 +90,17 @@ class _MyHomePageState extends State<MyHomePage> {
   initApp() async {
     prefs = await SharedPreferences.getInstance();
     String loggedEmail = prefs.getString('user');
+    String zohoUserRef = prefs.getString('zoho-user');
     print("loggedEmail");
     print(loggedEmail);
+    initSpeech();
     if(loggedEmail?.isEmpty ?? true) {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()));
     } else {
       this.user = IUser.fromJson(json.decode(loggedEmail));
+      this.zohoUser = IZohoUser.fromJson(json.decode(zohoUserRef));
+      this.refreshEmpDetails(user.email);
+      initBot();
     }
     this.connectToServer();
     setState(() {
@@ -87,26 +109,71 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
+  initSpeech() {
+    _speech = SpeechRecognition();
+    _speech.setAvailabilityHandler((bool result) {
+        print('rwsule voice');
+        print(result);
+        setState(() => _speechRecognitionAvailable = result);
+    });
+    _speech.setCurrentLocaleHandler((String locale) =>
+        setState(() => _currentSpeechLocale = locale));
+    _speech.setRecognitionStartedHandler(() 
+      => setState(() => _isListening = true));
+    _speech.setRecognitionResultHandler((String text) 
+      {
+         setState(() => transcription = text);
+         print(text);
+         
+        //  Navigator.pop(context);
+      });
+    _speech.setRecognitionCompleteHandler(() 
+      {
+         print('completed');
+         setState(() => _isListening = false);
+         if(!this._isListening && this.transcription.length > 0) {
+            sendQuery(this.transcription);
+              setState(() {
+                transcription = '';
+            });
+          }
+         
+         
+        //  Navigator.pop(context);
+      });
+    _speech
+      .activate()
+      .then((res) => setState(() => _speechRecognitionAvailable = res)).catchError((onError) {
+        print('Errr');
+        print(onError);
+      });
+  }
+
+
   initBot() async {
-    
+    setState(() {
+      userRoleType = commonService.getEmpAccessType(this.zohoUser.Department);
+    });
   }
 
 
   onSendQuery(query) {
     print(_baseUrl + 'query');
     Map data = {
-      "emailId": "vinay.bv@accionlabs.com",
-      "empId": "393858000000126653",
+      "emailId": this.user.email,
+      "empId": this.zohoUser.empId,
       "msg": query,
       "uuid": "ssssss",
 
       "headers": {
-        "employeeId": "1698",
-        "role": "Admin"
+        "employeeId": this.zohoUser.EmployeeID,
+        "role": this.userRoleType,
+        "version": environment['appVersion']
       }
     };
     setState(() {
       loading = true;
+      fieldValue = '';
     });
     http.post(_baseUrl + 'query', 
               headers: {"Content-Type": "application/json"},
@@ -172,6 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   sendQuery(query) {
+    print('sendQuery callled--------_>');
     this.pushMsgs(IMsg(msg: query, type: 'text', from: 'user'));
     // this.msgs.add(IMsg(msg: query, type: 'text', from: 'user'));
     // setState(() {
@@ -214,8 +282,21 @@ class _MyHomePageState extends State<MyHomePage> {
   navigateToProfile() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Profile(user: this.user)),
+      MaterialPageRoute(builder: (context) => Profile(user: this.user, zohoUser: this.zohoUser,)),
     );
+  }
+
+  refreshEmpDetails(String email) async {
+    this.httpService.getEmp(email).then((onValue){
+      print("onValue");
+      print(onValue.body);
+      IZohoUser zohoUserInstance = IZohoUser.fromJson(json.decode(onValue.body));
+      prefs.setString('zoho-user', json.encode(zohoUser.toJson()));
+      setState(() {
+        loading = false;
+        zohoUser = zohoUserInstance;
+      });
+    });
   }
 
   putSuggestions() {
@@ -264,8 +345,99 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  recordVoice(BuildContext context) {
+    print(this._speechRecognitionAvailable);
+    print(this._currentSpeechLocale);
+    this._speech.listen(locale:this._currentSpeechLocale).then((onValue)=>print('result---------->'));
+    
+    // this._controller = showModalBottomSheet(
+    //   context: context,
+    //   // backgroundColor: Colors.transparent,
+    //   builder: (BuildContext bc) {
+    //     return Container(
+    //       height: 80,
+    //       // width: MediaQuery.of(context).size.width,
+    //       child: Column(
+    //         crossAxisAlignment: CrossAxisAlignment.center,
+    //         mainAxisAlignment: MainAxisAlignment.center,
+    //         children: <Widget>[
+    //           Container(
+    //             height: 40,
+    //             padding: EdgeInsets.only(top: 12),
+    //             child: Text(transcription != null ? transcription : 'Say Something...', style: TextStyle(
+    //               color: Colors.black26,
+    //               fontWeight: FontWeight.w500
+    //             ),),
+    //           ),
+    //           Container(
+    //             height: 40,
+    //             child: SpinKitRipple(
+    //                     color: COLORS['primary'],
+    //                     size: 50.0,
+    //                     duration: Duration(milliseconds: 1200),
+    //                   ),
+    //           )
+              
+    //         ],
+    //       ),
+    //     );
+    //   }
+    // ).whenComplete(() {
+    //   print('modal closed');
+    //   _speech.cancel().then((onValue){
+    //     print('result text');
+    //     setState(() {
+    //       transcription = null;
+    //     });
+    //     print(onValue);
+    //   });
+    //   this._speech.stop();
+    // });
+  }
+
+  getVoiceBtnHandler() {
+    if(this._isListening == true) return Container(
+      child: SpinKitRipple(
+        color: COLORS['primary'],
+      )
+    );
+    else return IconButton(
+                  disabledColor: Colors.black12,
+                  icon: Icon(
+                    Icons.keyboard_voice,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  onPressed: () {
+                    recordVoice(context);
+                  });
+  }
+
+  getInputHandle() {
+     return TextField(
+                  controller: _textEditingController,
+                  onChanged: (text) {
+                    fieldValue = text;
+                    setState(
+                      () {
+                        fieldValue = fieldValue;
+                      },
+                    );
+                  },
+                  readOnly: this._isListening == true,
+                  style: TextStyle(
+                      fontSize: 18, color: Colors.black),
+                  decoration: InputDecoration(
+                    hintText: this._isListening == true ? this.transcription != null ? this.transcription : 'Say Something...' : 'Ask something..',
+                    hintStyle:
+                        TextStyle(color: Color(0xFFBBBBBB)),
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext _context) {
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.white));
     return Scaffold(
@@ -317,103 +489,89 @@ class _MyHomePageState extends State<MyHomePage> {
         toolbarOpacity: 0.7,
         elevation: 1.6,
       ),
-      body: Center(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                decoration: BoxDecoration(
-                  color: Colors.white
+      body: Builder(
+        builder: (BuildContext context) {
+          return Center(
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    decoration: BoxDecoration(
+                      color: Colors.white
+                    ),
+                    child: new ListView.builder(
+                      controller: _scrollController,
+                      itemCount: (msgs != null ? msgs.length : 0),
+                      itemBuilder: (BuildContext context, int index) {
+                        return new MsgContainer(
+                          msgs[index], 
+                          sendQuery, 
+                          (index == msgs.length-1 && loading)
+                        );
+                      },
+                    ),
+                  )
                 ),
-                child: new ListView.builder(
-                  controller: _scrollController,
-                  itemCount: (msgs != null ? msgs.length : 0),
-                  itemBuilder: (BuildContext context, int index) {
-                    return new MsgContainer(
-                      msgs[index], 
-                      sendQuery, 
-                      (index == msgs.length-1 && loading)
-                    );
-                  },
-                ),
-              )
-            ),
-            Container(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                      top: BorderSide(width: 0.5, color: Colors.black26)),
-                ),
-                child: Column(
-                  children: <Widget>[
-                    this.putSuggestions(),
-                    Row(
+                Container(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                          top: BorderSide(width: 0.5, color: Colors.black26)),
+                    ),
+                    child: Column(
                       children: <Widget>[
-                        Expanded(
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  // boxShadow: [
-                                  //   BoxShadow(
-                                  //     color: Color(0xFFe9e9e9),
-                                  //     offset: Offset(0, 0),
-                                  //     spreadRadius: 1.0,
-                                  //     blurRadius: 1.0
-                                  //   ),
-                                  // ]
-                                ),
-                                height: 50,
-                                padding: EdgeInsets.fromLTRB(13, 0, 13, 0),
-                                child: TextField(
-                                  controller: _textEditingController,
-                                  onChanged: (text) {
-                                    fieldValue = text;
-                                    setState(
-                                      () {
-                                        fieldValue = fieldValue;
-                                      },
-                                    );
-                                  },
-                                  style: TextStyle(
-                                      fontSize: 18, color: Colors.black),
-                                  decoration: InputDecoration(
-                                    hintText: 'Ask something..',
-                                    hintStyle:
-                                        TextStyle(color: Color(0xFFBBBBBB)),
-                                    border: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
+                        this.putSuggestions(),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Stack(
+                                children: <Widget>[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      // boxShadow: [
+                                      //   BoxShadow(
+                                      //     color: Color(0xFFe9e9e9),
+                                      //     offset: Offset(0, 0),
+                                      //     spreadRadius: 1.0,
+                                      //     blurRadius: 1.0
+                                      //   ),
+                                      // ]
+                                    ),
+                                    height: 50,
+                                    padding: EdgeInsets.fromLTRB(13, 0, 13, 0),
+                                    child: this.getInputHandle(),
                                   ),
-                                ),
-                              ),
-                              new Positioned(
-                                right: 0,
-                                child: IconButton(
-                                  disabledColor: Colors.black12,
-                                  icon: Icon(
-                                    Icons.send,
-                                    color: Theme.of(context).primaryColor,
+                                  new Positioned(
+                                    right: 0,
+                                    child: (fieldValue != '' && fieldValue != null) ? 
+                                              IconButton(
+                                                disabledColor: Colors.black12,
+                                                icon: Icon(
+                                                  Icons.send,
+                                                  color: Theme.of(context).primaryColor,
+                                                ),
+                                                onPressed:
+                                                    fieldValue == '' || fieldValue == null
+                                                        ? null
+                                                        : onSendButton,
+                                              ) : this.getVoiceBtnHandler()
                                   ),
-                                  onPressed:
-                                      fieldValue == '' || fieldValue == null
-                                          ? null
-                                          : onSendButton,
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+          ); //
+        }
+      )
     );
   }
 }

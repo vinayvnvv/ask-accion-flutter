@@ -25,7 +25,7 @@ class _MsgLoader extends State<MsgLoader> {
   }
 
   initAnim() {
-    _timer = new Timer.periodic(const Duration(milliseconds: 500), (timer) {
+    _timer = new Timer.periodic(const Duration(milliseconds: 700), (timer) {
       setState(() {
         _opacity = this._opacity == 1.0 ? 0.0 : 1.0;
       });
@@ -48,7 +48,7 @@ class _MsgLoader extends State<MsgLoader> {
         height: 10,
         margin: EdgeInsets.fromLTRB(3, 0, 3, 0),
         decoration: BoxDecoration(
-          color: Color(0xFF888888),
+          color: Color(0xFFa0a0a0),
           borderRadius: BorderRadius.all(Radius.circular(50))
         ),
       ),

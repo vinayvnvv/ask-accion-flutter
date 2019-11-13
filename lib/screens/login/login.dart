@@ -2,6 +2,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uiplay/main.dart';
 import 'package:uiplay/model/user.dart';
 import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -36,7 +37,7 @@ class _LoginAppState extends State<Login> {
     print("loggedEmail");
     print(loggedEmail);
     if(!(loggedEmail?.isEmpty ?? true)) {
-      // navigateToHome();
+      navigateToHome();
       setState(() {
         isLoggenIn = false;
       });
@@ -47,10 +48,22 @@ class _LoginAppState extends State<Login> {
     }
   }
 
+  navigateToHome() {
+    setState(() {
+      isLoggenIn = true;
+    });
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(
+      title: 'Assistance',
+    )));
+  }
+
   Future<FirebaseUser> _signIn(context) async {
     setState(() {
       loading = true;
     });
+
+    await FirebaseAuth.instance.signOut();
+    await _googleSignIn.signOut();
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
@@ -59,6 +72,22 @@ class _LoginAppState extends State<Login> {
       idToken: googleAuth.idToken,
     );
     _auth.signInWithCredential(credential).then((onValue) {
+      String domain = onValue.email.split('@')[1];
+      if(domain != 'accionlabs.com') {
+        showDialog(
+          context: context,
+          builder: (BuildContext ctxt) {
+            return AlertDialog(
+              title: Text('Invalid Mail!'),
+              content: Text('Email domain should be @accionlabs.com'),
+            );
+          }
+        );
+        setState(() {
+          loading = false;
+        });
+        return;
+      }
       print("onValue -> ${onValue}");
       IUser _user = IUser(
             displayName: onValue.displayName, 

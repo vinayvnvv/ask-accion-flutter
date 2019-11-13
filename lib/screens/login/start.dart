@@ -1,10 +1,10 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:uiplay/constants/colors.dart';
 import 'package:uiplay/main.dart';
 import 'package:uiplay/model/user.dart';
+import 'package:uiplay/services/common.service.dart';
 
 class StartAppPage extends StatefulWidget {
   IZohoUser zohoUser;
@@ -12,11 +12,12 @@ class StartAppPage extends StatefulWidget {
   StartAppPage({Key key, @required this.zohoUser, @required this.googleUser}) : super(key: key);
   @override
   State<StatefulWidget> createState() {
-    return _StartAppPage();
+    return _StartAppPage()  ;
   }
 }
 
 class _StartAppPage extends State<StartAppPage> {
+  CommonService commonService = new CommonService();
   firstPage(BuildContext context) {
     return Container(
       child: new Column(
@@ -46,9 +47,11 @@ class _StartAppPage extends State<StartAppPage> {
             padding: EdgeInsets.fromLTRB(0, 0, 0, 21),
             child: Text( widget.zohoUser.EmailID, style: TextStyle(
               fontSize: 16,
+              color: Colors.black45,
               fontWeight: FontWeight.w400
             ),),
           ),
+          commonService.getEmpAccessType(this.widget.zohoUser.Department) == 'Admin' ?
           Padding(
             padding: EdgeInsets.fromLTRB(0, 21, 0, 21),
             child: Container(
@@ -63,6 +66,8 @@ class _StartAppPage extends State<StartAppPage> {
                 fontSize: 12
               ),),
             )
+          ) : (
+            Container()
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(0, 41, 0, 21),
