@@ -174,6 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
         "employeeId": this.zohoUser.EmployeeID,
         "role": this.userRoleType,
         // "role": 'Admin',
+        "hr": this.zohoUser.Business_HR,
         "version": environment['appVersion']
       }
     };
@@ -187,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print("Response send query");
         print(onValue.body);
         String _msg = onValue.body;
-        _msg = this.msgParser.parseMsgVars(_msg, user);
+        _msg = this.msgParser.parseMsgVars(_msg, user, zohoUser);
         IMsg msg = IMsg.fromJson(json.decode(_msg));
         this.pushMsgs(msg);
         // this.msgs.add(msg);
