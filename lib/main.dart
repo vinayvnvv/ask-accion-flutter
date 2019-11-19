@@ -466,7 +466,7 @@ class _MyHomePageState extends State<MyHomePage> {
             new Container(
               margin: EdgeInsets.fromLTRB(9, 0, 0, 0),
               child: Text(
-                widget.title,
+                'Ask Accion',
                 style: TextStyle(color: Colors.black),
               ),
             ),
