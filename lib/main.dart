@@ -12,6 +12,7 @@ import 'package:uiplay/screens/login/login.dart';
 import 'package:uiplay/screens/profile/profile.dart';
 import 'package:uiplay/services/common.service.dart';
 import 'package:uiplay/services/http.service.dart';
+import 'package:uiplay/services/native-actions.service.dart';
 import 'package:uiplay/services/parser.dart';
 import 'msg-container.dart';
 import './model/msg.dart';
@@ -19,7 +20,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import './env.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 // List listData = [{'msg': 'Helo vinay, Good evening, how are you doing?', 'type': 'text', 'from': 'bot'}, {'msg': 'hello', 'type': 'text', 'from': 'user'}];
 
@@ -67,11 +70,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Parser msgParser = new Parser();
   SpeechRecognition _speech;
   bool _speechRecognitionAvailable;
+  bool isBotConnected = false;
   String _currentSpeechLocale;
   var _voiceModalSheetContext;
   bool _isListening;
   String transcription;
   var _controller;
+  NativeActions nativeActions = new NativeActions();
 
   final String _baseUrl = environment['baseUrl'];
 
@@ -129,14 +134,14 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     _speech.setRecognitionCompleteHandler(() 
       {
-         print('completed');
-         setState(() => _isListening = false);
+         print('completed-------> $_isListening');
          if(!this._isListening && this.transcription.length > 0) {
             sendQuery(this.transcription);
               setState(() {
                 transcription = '';
             });
           }
+          setState(() => _isListening = false);
          
          
         //  Navigator.pop(context);
@@ -168,6 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
       "headers": {
         "employeeId": this.zohoUser.EmployeeID,
         "role": this.userRoleType,
+        // "role": 'Admin',
         "version": environment['appVersion']
       }
     };
@@ -188,10 +194,14 @@ class _MyHomePageState extends State<MyHomePage> {
         // setState(() {
         //   msgs = msgs;
         // });
+        this.nativeActions.doAction(msg);
         setState(() {
           loading = false;
         });
-        this.scrollToBottom();
+        
+        if(msg.listView.length > 5)
+          this.scrollToBottom(this._scrollController.position.pixels + MediaQuery.of(context).size.height - 200);
+        else this.scrollToBottom();
       },
     );
   }
@@ -249,13 +259,13 @@ class _MyHomePageState extends State<MyHomePage> {
     this.onSendQuery(query);
   }
 
-  scrollToBottom() {
+  scrollToBottom([position]) {
     Future.delayed(
       const Duration(milliseconds: 300),
       () {
         _textEditingController.clear();
         this._scrollController.animateTo(
-            this._scrollController.position.maxScrollExtent,
+            position != null ? position : this._scrollController.position.maxScrollExtent,
             curve: Curves.easeOut,
             duration: const Duration(milliseconds: 300));
       },
@@ -273,6 +283,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // });
         setState(() {
           loading = false;
+          isBotConnected = true;
         });
         this.pushMsgs(msg);
       },
@@ -298,7 +309,6 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     });
   }
-
   putSuggestions() {
     var listView = new ListView.builder(
       scrollDirection: Axis.horizontal,
@@ -348,7 +358,7 @@ class _MyHomePageState extends State<MyHomePage> {
   recordVoice(BuildContext context) {
     print(this._speechRecognitionAvailable);
     print(this._currentSpeechLocale);
-    this._speech.listen(locale:this._currentSpeechLocale).then((onValue)=>print('result---------->'));
+    _speech.listen(locale:this._currentSpeechLocale).then((onValue)=>print('result----------->: $onValue'));
     
     // this._controller = showModalBottomSheet(
     //   context: context,
@@ -409,6 +419,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   onPressed: () {
                     recordVoice(context);
+                    setState(() {
+                      _isListening = true;
+                    });
                   });
   }
 
@@ -427,7 +440,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   style: TextStyle(
                       fontSize: 18, color: Colors.black),
                   decoration: InputDecoration(
-                    hintText: this._isListening == true ? this.transcription != null ? this.transcription : 'Say Something...' : 'Ask something..',
+                    hintText: this._isListening == true ? (this.transcription != null && this.transcription != '') ? this.transcription : 'Say Something...' : 'Ask something..',
                     hintStyle:
                         TextStyle(color: Color(0xFFBBBBBB)),
                     border: InputBorder.none,
@@ -522,6 +535,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Column(
                       children: <Widget>[
                         this.putSuggestions(),
+                        this.isBotConnected == true ?
                         Row(
                           children: <Widget>[
                             Expanded(
@@ -562,6 +576,21 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                             ),
                           ],
+                        ) : (
+                          Container(
+                            height: 50,
+                            color: Colors.white,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                SpinKitThreeBounce(
+                                  size: 30,
+                                  color: Colors.black12,
+                                )
+                              ],
+                            ),
+                          ) 
                         ),
                       ],
                     ),

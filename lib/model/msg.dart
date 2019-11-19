@@ -9,16 +9,19 @@ class IMsg {
   String msg;
   String type;
   String from;
+  bool isCall;
+  List<String> phoneNumber;
   List<IMenu> menu;
   List<String> suggestions;
   List<String> list;
   List<IPoepleList> peopleList;
   List<IListView> listView;
-  IMsg({this.msg, this.type, this.from, this.menu, this.suggestions, this.list, this.peopleList, this.listView});
+  IMsg({this.msg, this.type, this.from, this.menu, this.suggestions, this.list, this.peopleList, this.listView, this.isCall, this.phoneNumber});
 
   factory IMsg.fromJson(Map<String, dynamic> json) {
     var menu = json['menu'] as List;
     var suggestions = json['suggestions'] as List;
+    var phoneNumbers = json['phoneNumber'] as List;
     var peopleLists = json['peopleList'] as List;
     var listViews = json['listView'] as List;
     var list = json['list'] as List;
@@ -37,6 +40,8 @@ class IMsg {
       list: list != null ? new List<String>.from(list) : [],
       peopleList: peopleList,
       listView: listView,
+      phoneNumber: phoneNumbers != null ? new List<String>.from(phoneNumbers) : [],
+      isCall: json['isCall'] != null ? json['isCall'] : false,
     );
   }
   
