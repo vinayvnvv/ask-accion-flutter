@@ -1,5 +1,5 @@
 final environment = {
   'appVersion': '1.0',
-  'baseUrl': 'http://10.10.5.131:4000/api/'
-  // 'baseUrl': 'https://ask-accion.herokuapp.com/api/'
+  // 'baseUrl': 'http://10.10.5.131:4000/api/'
+  'baseUrl': 'https://ask-accion.herokuapp.com/api/'
 };
