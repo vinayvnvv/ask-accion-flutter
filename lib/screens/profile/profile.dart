@@ -141,7 +141,7 @@ class Profile extends StatelessWidget {
                 getDivider(),
                 generateRow('Blood group', zohoUser.Bloodgroup, context),
                 getDivider(),
-                generateRow('Reporting HR', zohoUser.Business_HR, context),
+                generateRow('Business HR', zohoUser.Business_HR, context),
                 getDivider(),
                 generateRow('location', zohoUser.LocationName, context),
                 getDivider(),

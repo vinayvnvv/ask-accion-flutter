@@ -14,6 +14,7 @@ import 'package:uiplay/services/common.service.dart';
 import 'package:uiplay/services/http.service.dart';
 import 'package:uiplay/services/native-actions.service.dart';
 import 'package:uiplay/services/parser.dart';
+import 'package:uuid/uuid.dart';
 import 'msg-container.dart';
 import './model/msg.dart';
 import 'dart:convert';
@@ -59,6 +60,8 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> suggestions = [];
   String fieldValue = '';
   IUser user;
+  Uuid uuid = Uuid();
+  String sessionId;
   HttpService httpService = new HttpService();
   IZohoUser zohoUser;
   bool loading = true;
@@ -96,6 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
     prefs = await SharedPreferences.getInstance();
     String loggedEmail = prefs.getString('user');
     String zohoUserRef = prefs.getString('zoho-user');
+    sessionId = uuid.v1();
     print("loggedEmail");
     print(loggedEmail);
     initSpeech();
@@ -119,7 +123,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _speech.setAvailabilityHandler((bool result) {
         print('rwsule voice');
         print(result);
-        setState(() => _speechRecognitionAvailable = result);
+        setState(() {
+          _speechRecognitionAvailable = result; 
+          _isListening = result;
+        });
     });
     _speech.setCurrentLocaleHandler((String locale) =>
         setState(() => _currentSpeechLocale = locale));
@@ -168,13 +175,14 @@ class _MyHomePageState extends State<MyHomePage> {
       "emailId": this.user.email,
       "empId": this.zohoUser.empId,
       "msg": query,
-      "uuid": "ssssss",
+      "uuid": sessionId,
 
       "headers": {
         "employeeId": this.zohoUser.EmployeeID,
         "role": this.userRoleType,
         // "role": 'Admin',
         "hr": this.zohoUser.Business_HR,
+        'manager': this.zohoUser.Reporting_To,
         "version": environment['appVersion']
       }
     };
@@ -190,6 +198,10 @@ class _MyHomePageState extends State<MyHomePage> {
         String _msg = onValue.body;
         _msg = this.msgParser.parseMsgVars(_msg, user, zohoUser);
         IMsg msg = IMsg.fromJson(json.decode(_msg));
+        if(msg.resetSession == true) {
+          sessionId = uuid.v1();
+          print('resetting session=->$sessionId');
+        }
         this.pushMsgs(msg);
         // this.msgs.add(msg);
         // setState(() {
@@ -359,7 +371,7 @@ class _MyHomePageState extends State<MyHomePage> {
   recordVoice(BuildContext context) {
     print(this._speechRecognitionAvailable);
     print(this._currentSpeechLocale);
-    _speech.listen(locale:this._currentSpeechLocale).then((onValue)=>print('result----------->: $onValue'));
+    _speech.listen(locale:this._currentSpeechLocale).then((onValue)=>print('result----------->: $onValue')).catchError((onError)=>print('ERRORR_____>'));
     
     // this._controller = showModalBottomSheet(
     //   context: context,
@@ -418,12 +430,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     Icons.keyboard_voice,
                     color: Theme.of(context).primaryColor,
                   ),
-                  onPressed: () {
+                  onPressed: this._speechRecognitionAvailable ? () {
                     recordVoice(context);
                     setState(() {
-                      _isListening = true;
+                      _isListening = this._speechRecognitionAvailable ? true : false;
                     });
-                  });
+                  } : null);
   }
 
   getInputHandle() {
