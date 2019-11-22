@@ -418,7 +418,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // });
   }
 
-  getVoiceBtnHandler() {
+  getVoiceBtnHandler(context) {
     if(this._isListening == true) return Container(
       child: SpinKitRipple(
         color: COLORS['primary'],
@@ -435,7 +435,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     setState(() {
                       _isListening = this._speechRecognitionAvailable ? true : false;
                     });
-                  } : null);
+                  } : () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Container(
+                          height: 50,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text('Permission Denied!', style: TextStyle(
+                                fontWeight: FontWeight.w800
+                              ),),
+                              Text('Go to Settings > Permission > Microphone > Enable for Ask Accion')
+                            ],
+                          ),
+                        )
+                      )
+                    );
+                  });
   }
 
   getInputHandle() {
@@ -583,7 +600,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     fieldValue == '' || fieldValue == null
                                                         ? null
                                                         : onSendButton,
-                                              ) : this.getVoiceBtnHandler()
+                                              ) : this.getVoiceBtnHandler(context)
                                   ),
                                 ],
                               ),
