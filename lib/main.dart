@@ -164,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   initBot() async {
     setState(() {
-      userRoleType = commonService.getEmpAccessType(this.zohoUser.Department);
+      userRoleType = commonService.getEmpAccessType(this.zohoUser.Department, this.zohoUser.Role);
     });
   }
 
