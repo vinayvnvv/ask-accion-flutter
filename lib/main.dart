@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -80,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String transcription;
   var _controller;
   NativeActions nativeActions = new NativeActions();
+  Timer onTimer = null;
 
   final String _baseUrl = environment['baseUrl'];
 
@@ -124,33 +126,37 @@ class _MyHomePageState extends State<MyHomePage> {
         print('rwsule voice');
         print(result);
         setState(() {
-          _speechRecognitionAvailable = result; 
+          _speechRecognitionAvailable = result;
           _isListening = result;
         });
     });
     _speech.setCurrentLocaleHandler((String locale) =>
         setState(() => _currentSpeechLocale = locale));
-    _speech.setRecognitionStartedHandler(() 
+    _speech.setRecognitionStartedHandler(()
       => setState(() => _isListening = true));
-    _speech.setRecognitionResultHandler((String text) 
+    _speech.setRecognitionResultHandler((String text)
       {
          setState(() => transcription = text);
-         print(text);
-         
+         if (Platform.isIOS) {
+           onTimer?.cancel();
+           onTimer = Timer(Duration(milliseconds: 1500), () {
+             _speech.stop();
+           });
+         }
         //  Navigator.pop(context);
       });
-    _speech.setRecognitionCompleteHandler(() 
+    _speech.setRecognitionCompleteHandler(()
       {
          print('completed-------> $_isListening');
-         if(!this._isListening && this.transcription.length > 0) {
+         if(this.transcription.length > 0) {
             sendQuery(this.transcription);
               setState(() {
                 transcription = '';
             });
           }
           setState(() => _isListening = false);
-         
-         
+
+
         //  Navigator.pop(context);
       });
     _speech
@@ -190,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
       loading = true;
       fieldValue = '';
     });
-    http.post(_baseUrl + 'query', 
+    http.post(_baseUrl + 'query',
               headers: {"Content-Type": "application/json"},
               body: json.encode(data)).then((onValue) {
         print("Response send query");
@@ -211,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           loading = false;
         });
-        
+
         if(msg.listView.length > 5)
           this.scrollToBottom(this._scrollController.position.pixels + MediaQuery.of(context).size.height - 200);
         else this.scrollToBottom();
@@ -372,7 +378,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print(this._speechRecognitionAvailable);
     print(this._currentSpeechLocale);
     _speech.listen(locale:this._currentSpeechLocale).then((onValue)=>print('result----------->: $onValue')).catchError((onError)=>print('ERRORR_____>'));
-    
+
     // this._controller = showModalBottomSheet(
     //   context: context,
     //   // backgroundColor: Colors.transparent,
@@ -400,7 +406,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //                     duration: Duration(milliseconds: 1200),
     //                   ),
     //           )
-              
+
     //         ],
     //       ),
     //     );
@@ -506,7 +512,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               GestureDetector(
                 onTap: this.navigateToProfile,
-                child: 
+                child:
                   Hero(
                     tag: 'profile-avtar',
                     child:
@@ -524,7 +530,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                   ),
               )
-              
+
             ],
           ),
         ],
@@ -548,8 +554,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       itemCount: (msgs != null ? msgs.length : 0),
                       itemBuilder: (BuildContext context, int index) {
                         return new MsgContainer(
-                          msgs[index], 
-                          sendQuery, 
+                          msgs[index],
+                          sendQuery,
                           (index == msgs.length-1 && loading)
                         );
                       },
@@ -589,7 +595,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                   new Positioned(
                                     right: 0,
-                                    child: (fieldValue != '' && fieldValue != null) ? 
+                                    child: (fieldValue != '' && fieldValue != null) ?
                                               IconButton(
                                                 disabledColor: Colors.black12,
                                                 icon: Icon(
@@ -620,7 +626,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 )
                               ],
                             ),
-                          ) 
+                          )
                         ),
                       ],
                     ),
