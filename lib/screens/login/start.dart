@@ -51,24 +51,24 @@ class _StartAppPage extends State<StartAppPage> {
               fontWeight: FontWeight.w400
             ),),
           ),
-          commonService.getEmpAccessType(this.widget.zohoUser.Department) == 'Admin' ?
-          Padding(
-            padding: EdgeInsets.fromLTRB(0, 21, 0, 21),
-            child: Container(
-              padding: EdgeInsets.fromLTRB(5, 2, 5, 2),
-              decoration: BoxDecoration(
-                color: Color(0xFF52c41a),
-                borderRadius: BorderRadius.all(Radius.circular(50)),
-              ),
-              child: Text('Logged In As Admin', style: TextStyle(
-                color: Color(0xFFffffff),
-                fontWeight: FontWeight.w600,
-                fontSize: 12
-              ),),
-            )
-          ) : (
-            Container()
-          ),
+          this.widget.zohoUser.accessType == 'Admin' ?
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 21, 0, 21),
+              child: Container(
+                padding: EdgeInsets.fromLTRB(5, 2, 5, 2),
+                decoration: BoxDecoration(
+                  color: Color(0xFF52c41a),
+                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                ),
+                child: Text('Logged In As Admin', style: TextStyle(
+                  color: Color(0xFFffffff),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12
+                ),),
+              )
+            ) : (
+              Container()
+            ),
           Padding(
             padding: EdgeInsets.fromLTRB(0, 41, 0, 21),
             child: RaisedButton(

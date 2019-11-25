@@ -52,12 +52,13 @@ class IZohoUser {
   String Reporting_To;
   String Expertise;
   String empId;
+  String accessType;
 
   IZohoUser({this.EmailID, this.Date_of_birth, this.Photo, this.Male, this.Bloodgroup, this.Employeestatus, 
             this.Role, this.Project, this.Experience, this.Business_HR, this.LastName, this.EmployeeID, 
             this.Other_Email, this.Work_location, this.LocationName, this.Designation, this.FirstName, 
             this.Dateofjoining, this.Mobile, this.Birth_Date_as_per_Records, this.Hobbies, this.Department, 
-            this.Reporting_To, this.Expertise, this.empId});
+            this.Reporting_To, this.Expertise, this.empId, this.accessType});
 
   factory IZohoUser.fromJson(Map<String, dynamic> json) {
     return IZohoUser(
@@ -86,6 +87,7 @@ class IZohoUser {
       Department: json['Department'],
       Reporting_To: json['Reporting_To'],
       empId: json['empId'],
+      accessType: json['accessType'],
       
     );
   }
@@ -117,6 +119,7 @@ class IZohoUser {
       "Department": "${this.Department}",
       "Reporting_To": "${this.Reporting_To}",
       "empId": "${this.empId}",
+      "accessType": "${this.accessType}"
     };
   }
 }

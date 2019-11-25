@@ -110,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       this.user = IUser.fromJson(json.decode(loggedEmail));
       this.zohoUser = IZohoUser.fromJson(json.decode(zohoUserRef));
-      this.refreshEmpDetails(user.email);
+      this.refreshEmpDetails(zohoUser.EmailID);
       initBot();
     }
     this.connectToServer();
@@ -178,15 +178,15 @@ class _MyHomePageState extends State<MyHomePage> {
   onSendQuery(query) {
     print(_baseUrl + 'query');
     Map data = {
-      "emailId": this.user.email,
+      "emailId": this.zohoUser.EmailID,
       "empId": this.zohoUser.empId,
       "msg": query,
       "uuid": sessionId,
-
       "headers": {
         "employeeId": this.zohoUser.EmployeeID,
-        "role": this.userRoleType,
-        // "role": 'Admin',
+        "accessType": this.zohoUser.accessType,
+        "department": this.zohoUser.Department,
+        "role": this.zohoUser.Role,
         "hr": this.zohoUser.Business_HR,
         'manager': this.zohoUser.Reporting_To,
         "version": environment['appVersion']
