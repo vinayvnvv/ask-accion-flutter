@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String transcription;
   var _controller;
   NativeActions nativeActions = new NativeActions();
-  Timer onTimer = null;
+  Timer onTimer;
 
   final String _baseUrl = environment['baseUrl'];
 
@@ -122,6 +122,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   initSpeech() {
     _speech = SpeechRecognition();
+
+    // handle device current locale detection
+    _speech.setCurrentLocaleHandler((String locale) =>
+        setState(() => _currentSpeechLocale = "en_US"));
+
     _speech.setAvailabilityHandler((bool result) {
         print('rwsule voice');
         print(result);
@@ -130,16 +135,27 @@ class _MyHomePageState extends State<MyHomePage> {
           _isListening = result;
         });
     });
-    _speech.setCurrentLocaleHandler((String locale) =>
-        setState(() => _currentSpeechLocale = locale));
-    _speech.setRecognitionStartedHandler(()
-      => setState(() => _isListening = true));
+
+    _speech.setRecognitionStartedHandler(() {
+      setState(() => _isListening = true);
+      print('setRecognitionStartedHandler------->');
+      if (Platform.isIOS) {
+        onTimer?.cancel();
+        onTimer = Timer(Duration(milliseconds: 2000), () {
+          if(transcription == null || transcription.length == 0) {
+            _speech.stop();
+            setState(() => _isListening = false);
+          }
+        });
+      }
+    });
+
     _speech.setRecognitionResultHandler((String text)
       {
-         setState(() => transcription = text);
+        setState(() => transcription = text);
          if (Platform.isIOS) {
            onTimer?.cancel();
-           onTimer = Timer(Duration(milliseconds: 1500), () {
+           onTimer = Timer(Duration(milliseconds: 2000), () {
              _speech.stop();
            });
          }
@@ -155,14 +171,13 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           }
           setState(() => _isListening = false);
-
-
         //  Navigator.pop(context);
+
       });
     _speech
       .activate()
       .then((res) => setState(() => _speechRecognitionAvailable = res)).catchError((onError) {
-        print('Errr');
+        print('Error Message');
         print(onError);
       });
   }
@@ -377,7 +392,11 @@ class _MyHomePageState extends State<MyHomePage> {
   recordVoice(BuildContext context) {
     print(this._speechRecognitionAvailable);
     print(this._currentSpeechLocale);
-    _speech.listen(locale:this._currentSpeechLocale).then((onValue)=>print('result----------->: $onValue')).catchError((onError)=>print('ERRORR_____>'));
+    _speech.listen(locale:this._currentSpeechLocale).then((onValue)=>print('result----------->: $onValue')).catchError((onError){
+        print('ERRORR_____>');
+        _speech.stop();
+      }
+    );
 
     // this._controller = showModalBottomSheet(
     //   context: context,
