@@ -557,104 +557,106 @@ class _MyHomePageState extends State<MyHomePage> {
         toolbarOpacity: 0.7,
         elevation: 1.6,
       ),
-      body: Builder(
-        builder: (BuildContext context) {
-          return Center(
-            child: Column(
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    decoration: BoxDecoration(
-                      color: Colors.white
-                    ),
-                    child: new ListView.builder(
-                      controller: _scrollController,
-                      itemCount: (msgs != null ? msgs.length : 0),
-                      itemBuilder: (BuildContext context, int index) {
-                        return new MsgContainer(
-                          msgs[index],
-                          sendQuery,
-                          (index == msgs.length-1 && loading)
-                        );
-                      },
-                    ),
-                  )
-                ),
-                Container(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                          top: BorderSide(width: 0.5, color: Colors.black26)),
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        this.putSuggestions(),
-                        this.isBotConnected == true ?
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Stack(
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      // boxShadow: [
-                                      //   BoxShadow(
-                                      //     color: Color(0xFFe9e9e9),
-                                      //     offset: Offset(0, 0),
-                                      //     spreadRadius: 1.0,
-                                      //     blurRadius: 1.0
-                                      //   ),
-                                      // ]
+      body: SafeArea(
+        child: Builder(
+          builder: (BuildContext context) {
+            return Center(
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      decoration: BoxDecoration(
+                        color: Colors.white
+                      ),
+                      child: new ListView.builder(
+                        controller: _scrollController,
+                        itemCount: (msgs != null ? msgs.length : 0),
+                        itemBuilder: (BuildContext context, int index) {
+                          return new MsgContainer(
+                            msgs[index],
+                            sendQuery,
+                            (index == msgs.length-1 && loading)
+                          );
+                        },
+                      ),
+                    )
+                  ),
+                  Container(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                            top: BorderSide(width: 0.5, color: Colors.black26)),
+                      ),
+                      child: Column(
+                        children: <Widget>[
+                          this.putSuggestions(),
+                          this.isBotConnected == true ?
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Stack(
+                                  children: <Widget>[
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        // boxShadow: [
+                                        //   BoxShadow(
+                                        //     color: Color(0xFFe9e9e9),
+                                        //     offset: Offset(0, 0),
+                                        //     spreadRadius: 1.0,
+                                        //     blurRadius: 1.0
+                                        //   ),
+                                        // ]
+                                      ),
+                                      height: 50,
+                                      padding: EdgeInsets.fromLTRB(13, 0, 13, 0),
+                                      child: this.getInputHandle(),
                                     ),
-                                    height: 50,
-                                    padding: EdgeInsets.fromLTRB(13, 0, 13, 0),
-                                    child: this.getInputHandle(),
-                                  ),
-                                  new Positioned(
-                                    right: 0,
-                                    child: (fieldValue != '' && fieldValue != null) ?
-                                              IconButton(
-                                                disabledColor: Colors.black12,
-                                                icon: Icon(
-                                                  Icons.send,
-                                                  color: Theme.of(context).primaryColor,
-                                                ),
-                                                onPressed:
-                                                    fieldValue == '' || fieldValue == null
-                                                        ? null
-                                                        : onSendButton,
-                                              ) : this.getVoiceBtnHandler(context)
-                                  ),
+                                    new Positioned(
+                                      right: 0,
+                                      child: (fieldValue != '' && fieldValue != null) ?
+                                                IconButton(
+                                                  disabledColor: Colors.black12,
+                                                  icon: Icon(
+                                                    Icons.send,
+                                                    color: Theme.of(context).primaryColor,
+                                                  ),
+                                                  onPressed:
+                                                      fieldValue == '' || fieldValue == null
+                                                          ? null
+                                                          : onSendButton,
+                                                ) : this.getVoiceBtnHandler(context)
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ) : (
+                            Container(
+                              height: 50,
+                              color: Colors.white,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  SpinKitThreeBounce(
+                                    size: 30,
+                                    color: Colors.black12,
+                                  )
                                 ],
                               ),
-                            ),
-                          ],
-                        ) : (
-                          Container(
-                            height: 50,
-                            color: Colors.white,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                SpinKitThreeBounce(
-                                  size: 30,
-                                  color: Colors.black12,
-                                )
-                              ],
-                            ),
-                          )
-                        ),
-                      ],
+                            )
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ); //
-        }
+                ],
+              ),
+            ); //
+          }
+        ),
       )
     );
   }
