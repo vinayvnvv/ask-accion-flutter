@@ -53,28 +53,28 @@ class MsgContainer extends StatelessWidget {
   addLinks(IMsg msg, context) {
     List<Widget> widgets = [];
     // phone number match
-    var phoneMatch = new RegExp(r'(?:[+0]9)?[0-9]{10}').stringMatch(msg.msg);
-    if(phoneMatch != null) {
-      widgets.add(InkWell(
-        child: Row(
-          children: <Widget>[
-            Icon(Icons.phone_forwarded, color: Colors.blue, size: 15,),
-            Padding(
-              padding: EdgeInsets.only(left: 5),
-              child: Text(phoneMatch, style: TextStyle(
-                color: Colors.blue
-              ),),
-            )
-          ],
-        ),
-        onTap: () async {
-          String url = 'tel:$phoneMatch';
-          if(await canLaunch(url)) {
-            launch(url);
-          }
-        },
-      ));
-    }
+    // var phoneMatch = new RegExp(r'(?:[+0]9)?[0-9]{10}').stringMatch(msg.msg);
+    // if(phoneMatch != null) {
+    //   widgets.add(InkWell(
+    //     child: Row(
+    //       children: <Widget>[
+    //         Icon(Icons.phone_forwarded, color: Colors.blue, size: 15,),
+    //         Padding(
+    //           padding: EdgeInsets.only(left: 5),
+    //           child: Text(phoneMatch, style: TextStyle(
+    //             color: Colors.blue
+    //           ),),
+    //         )
+    //       ],
+    //     ),
+    //     onTap: () async {
+    //       String url = 'tel:$phoneMatch';
+    //       if(await canLaunch(url)) {
+    //         launch(url);
+    //       }
+    //     },
+    //   ));
+    // }
     if(msg.phoneNumber.length != 0) {
       print('phoneNumber match-->$msg.phoneNumber');
       for(var i=0; i<msg.phoneNumber.length; i++) {
@@ -86,7 +86,7 @@ class MsgContainer extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(left: 5),
               child: Text(msg.phoneNumber[i], style: TextStyle(
-                color: Colors.blue
+                color: Colors.blue  
               ),),
             )
           ],
