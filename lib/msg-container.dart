@@ -75,6 +75,31 @@ class MsgContainer extends StatelessWidget {
         },
       ));
     }
+    if(msg.phoneNumber.length != 0) {
+      print('phoneNumber match-->$msg.phoneNumber');
+      for(var i=0; i<msg.phoneNumber.length; i++) {
+        print('phoneNumber-->$msg.phoneNumber[i]');
+        widgets.add(InkWell(
+        child: Row(
+          children: <Widget>[
+            Icon(Icons.phone_forwarded, color: Colors.blue, size: 15,),
+            Padding(
+              padding: EdgeInsets.only(left: 5),
+              child: Text(msg.phoneNumber[i], style: TextStyle(
+                color: Colors.blue
+              ),),
+            )
+          ],
+        ),
+        onTap: () async {
+          String url = 'tel:$msg.phoneNumber[i]';
+          if(await canLaunch(url)) {
+            launch(url);
+          }
+        },
+      ));
+      };
+    }
     var urlMatch = new RegExp(r'(http|https)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?').stringMatch(msg.msg);
     if(urlMatch != null) {
       widgets.add(InkWell(

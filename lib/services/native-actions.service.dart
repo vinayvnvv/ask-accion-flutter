@@ -13,5 +13,24 @@ class NativeActions {
       }
       
     }
+    print('msg action type-->');
+    if(msg.action != null) {
+      switch(msg.action.type) {
+        case 'link': 
+          this.lanchLink(msg.action);
+          break;
+      }
+    }
+  }
+  lanchLink(IMsgAction action) async {
+    print('Lanching link....');
+    String url = '';
+    if(action.linkType == 'url') url = action.linkUrl;
+    try {
+        if(await UrlLauncher.canLaunch(url))
+        await UrlLauncher.launch(url);
+      } catch(err) {
+        print(err);
+    }
   }
 }

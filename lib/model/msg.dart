@@ -11,13 +11,27 @@ class IMsg {
   String from;
   bool isCall;
   bool resetSession;
+  IMsgAction action;
   List<String> phoneNumber;
   List<IMenu> menu;
   List<String> suggestions;
   List<String> list;
   List<IPoepleList> peopleList;
   List<IListView> listView;
-  IMsg({this.msg, this.type, this.from, this.menu, this.suggestions, this.list, this.peopleList, this.listView, this.isCall, this.phoneNumber, this.resetSession});
+  IMsg({
+    this.msg, 
+    this.type, 
+    this.from, 
+    this.menu, 
+    this.suggestions, 
+    this.list, 
+    this.peopleList, 
+    this.listView, 
+    this.isCall, 
+    this.phoneNumber, 
+    this.resetSession, 
+    this.action
+  });
 
   factory IMsg.fromJson(Map<String, dynamic> json) {
     var menu = json['menu'] as List;
@@ -44,7 +58,23 @@ class IMsg {
       resetSession: json['resetSession'] != null ? json['resetSession'] : false,
       phoneNumber: phoneNumbers != null ? new List<String>.from(phoneNumbers) : [],
       isCall: json['isCall'] != null ? json['isCall'] : false,
+      action: json['action'] != null ? IMsgAction.fromJson(json['action']) : null,
     );
   }
   
+}
+
+class IMsgAction {
+  String type;
+  String linkType;
+  String linkUrl;
+  IMsgAction({this.type, this.linkType, this.linkUrl});
+
+  factory IMsgAction.fromJson(Map<String, dynamic> json) {
+    return IMsgAction(
+      linkType: json['linkType'],
+      linkUrl: json['linkUrl'],
+      type: json['type'],
+    );
+  }
 }
