@@ -2,6 +2,7 @@
 
 import 'package:uiplay/model/list-view.dart';
 import 'package:uiplay/model/people-list.dart';
+import 'package:uiplay/model/user.dart';
 
 import 'menu.dart';
 
@@ -18,6 +19,7 @@ class IMsg {
   List<String> list;
   List<IPoepleList> peopleList;
   List<IListView> listView;
+  IZohoUser profileCard;
   IMsg({
     this.msg, 
     this.type, 
@@ -30,7 +32,8 @@ class IMsg {
     this.isCall, 
     this.phoneNumber, 
     this.resetSession, 
-    this.action
+    this.action,
+    this.profileCard
   });
 
   factory IMsg.fromJson(Map<String, dynamic> json) {
@@ -59,6 +62,7 @@ class IMsg {
       phoneNumber: phoneNumbers != null ? new List<String>.from(phoneNumbers) : [],
       isCall: json['isCall'] != null ? json['isCall'] : false,
       action: json['action'] != null ? IMsgAction.fromJson(json['action']) : null,
+      profileCard: json['profileCard'] != null ? IZohoUser.fromJson(json['profileCard']) : null,
     );
   }
   
@@ -78,3 +82,4 @@ class IMsgAction {
     );
   }
 }
+
