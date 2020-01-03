@@ -201,6 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
         "employeeId": this.zohoUser.EmployeeID,
         "accessType": this.zohoUser.accessType,
         "department": this.zohoUser.Department,
+        // "department": 'Management',
         "role": this.zohoUser.Role,
         "hr": this.zohoUser.Business_HR,
         'manager': this.zohoUser.Reporting_To,

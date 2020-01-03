@@ -8,6 +8,7 @@ import 'package:uiplay/msg-types/people-list.dart';
 import 'package:url_launcher/url_launcher.dart';
 import './msg-types/text.dart';
 import './model/msg.dart';
+import 'msg-types/profile-view.dart';
 
 class MsgContainer extends StatelessWidget {
   IMsg item;
@@ -41,6 +42,9 @@ class MsgContainer extends StatelessWidget {
         break;
       case 'people-list':
         msgs.add(new PeopleListMsg(item, sendQuery));
+        break;
+      case 'profileCard':
+        msgs.add(new ProfileViewMsg(item));
         break;
     }
     if(item.from == 'bot') {
