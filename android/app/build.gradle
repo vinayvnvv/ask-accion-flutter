@@ -33,7 +33,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.uiplay"
+        applicationId "com.accion.askaccion"
         minSdkVersion 22
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
@@ -57,7 +57,11 @@ android {
 
     buildTypes {
         release {
+            minifyEnabled true
+            shrinkResources true
+            debuggable false
             signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
             minifyEnabled false
