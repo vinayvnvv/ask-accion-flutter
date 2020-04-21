@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:uiplay/model/user.dart';
 import './../model/msg.dart';
 
@@ -25,10 +26,21 @@ class ProfileViewMsg extends StatelessWidget {
             ),),
           ),
           Expanded(
-            child: Text(value, style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w500
-            ),),
+            child: new GestureDetector(
+              onLongPress: () {
+                Clipboard.setData(new ClipboardData(text: value));
+                final snackBar = SnackBar(
+                    content: Text('Copied ' + key + ': ' + value),
+                  );
+                  Scaffold.of(context).showSnackBar(snackBar);
+              },
+              child: 
+                Text(value, style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500
+                ),
+              )
+            ),
           )
         ],
       ),
@@ -49,6 +61,8 @@ class ProfileViewMsg extends StatelessWidget {
           ),),
         ),
         generateRow('name', zohoUser.FirstName + " " + zohoUser.LastName, context),
+        getDivider(),
+        generateRow('Email ID', zohoUser.EmailID, context),
         getDivider(),
         generateRow('emp id', zohoUser.EmployeeID, context),
         getDivider(),

@@ -200,8 +200,8 @@ class _MyHomePageState extends State<MyHomePage> {
       "headers": {
         "employeeId": this.zohoUser.EmployeeID,
         "accessType": this.zohoUser.accessType,
-        "department": this.zohoUser.Department,
-        // "department": 'Management',
+        // "department": this.zohoUser.Department,
+        "department": 'Management',
         "role": this.zohoUser.Role,
         "hr": this.zohoUser.Business_HR,
         'manager': this.zohoUser.Reporting_To,
@@ -238,11 +238,26 @@ class _MyHomePageState extends State<MyHomePage> {
           this.scrollToBottom(this._scrollController.position.pixels + MediaQuery.of(context).size.height - 200);
         else this.scrollToBottom();
       },
-    );
+    ).catchError((onError) {
+      sessionId = uuid.v1();
+      setState(() {
+          loading = false;
+      });
+      this.pushMsgs(
+        IMsg(msg: 'Oops! There is something technical or server error, we will send this query to the admin team, You can try again.',type: 'text', from: 'user')
+      );
+    });
   }
 
   onSendButton() {
     print('on{ressed');
+    if(fieldValue == 'clear *') {
+      setState(() {
+        fieldValue = "";
+        msgs= [];
+      });
+      return;
+    }
     print(fieldValue);
     this.pushMsgs(IMsg(msg: fieldValue, type: 'text', from: 'user'));
     // this.msgs.add(IMsg(msg: fieldValue, type: 'text', from: 'user'));
