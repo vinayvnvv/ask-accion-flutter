@@ -110,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       loading = true;
     });
-    http.post('http://intranet.accionlabs.com:3004/api/query', 
+    http.post('https://intranet.accionlabs.com/askAccionbackend/api/query',
               headers: {"Content-Type": "application/json"},
               body: json.encode(data)).then((onValue) {
         print("Response send query");
